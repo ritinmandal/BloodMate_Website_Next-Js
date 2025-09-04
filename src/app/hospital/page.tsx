@@ -74,7 +74,7 @@ export default function HospitalsWithMapTailwind({
   height = '620px',
   defaultZoom = 5,
   maxHospitals = 300,
-}: { height?: string; defaultZoom?: number; maxHospitals?: number }) {
+}) {
   const mapRef = useRef<LeafletMap | null>(null);
   const mapEl = useRef<HTMLDivElement | null>(null);
   const markersRef = useRef<Map<string, LeafletMarker>>(new Map());

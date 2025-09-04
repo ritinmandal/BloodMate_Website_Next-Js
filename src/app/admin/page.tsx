@@ -92,7 +92,7 @@ export default function AdminPage() {
         .select('id,blood_group,units_available,updated_at');
 
       const sorted = (data ?? []).sort(
-        (a,b) => groupsOrder.indexOf(a.blood_group as any) - groupsOrder.indexOf(b.blood_group as any)
+        (a,b) => groupsOrder.indexOf(a.blood_group as typeof groupsOrder[number]) - groupsOrder.indexOf(b.blood_group as typeof groupsOrder[number])
       );
 
       const map = new Map(sorted.map(r => [r.blood_group, r]));
@@ -156,7 +156,7 @@ export default function AdminPage() {
       }
 
       setInfo(`${signedDelta > 0 ? 'Added' : 'Subtracted'} ${abs} unit${abs > 1 ? 's' : ''} for ${g}.`);
-    } catch (e) {
+    } catch {
       setRows(prev => prev.map(r => r.blood_group === g ? { ...r, units_available: current.units_available } : r));
       setErr('Could not save change. Try again.');
     } finally {
@@ -164,8 +164,8 @@ export default function AdminPage() {
     }
   };
 
-  const colors = ['#f87171','#fbbf24','#34d399','#60a5fa','#a78bfa','#f472b6','#fb923c','#2dd4bf'];
   const chartData = useMemo(() => {
+    const colors = ['#f87171','#fbbf24','#34d399','#60a5fa','#a78bfa','#f472b6','#fb923c','#2dd4bf'];
     const labels = [...groupsOrder];
     const map = new Map(rows.map(r => [r.blood_group, r.units_available]));
     const values = labels.map(l => map.get(l) ?? 0);
@@ -211,7 +211,7 @@ export default function AdminPage() {
           ].map(({k,label,Icon}) => (
             <button
               key={k}
-              onClick={() => setView(k as any)}
+              onClick={() => setView(k as 'dashboard' | 'inventory' | 'charts' | 'settings')}
               className={`mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition
               ${view===k ? 'bg-rose-100 text-rose-700 ring-1 ring-rose-200' : 'hover:bg-gray-50'}`}
             >

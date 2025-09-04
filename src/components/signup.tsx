@@ -25,7 +25,6 @@ type HospitalForm = {
   bedCount?: string; consent?: boolean;
 };
 
-const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 const INPUT_CLS =
   "w-full rounded-xl border border-rose-300 bg-white/80 backdrop-blur px-3 py-2 text-sm text-gray-900 " +
@@ -74,8 +73,12 @@ export default function SignupForm() {
       setSubmitting(true);
       await new Promise((r) => setTimeout(r, 900));
       setMessage("✅ Account created! Please verify your email.");
-    } catch (e: any) {
-      setMessage(e?.message || "Something went wrong. Try again.");
+    } catch (e: unknown) {
+      if (typeof e === "object" && e !== null && "message" in e) {
+        setMessage((e as { message?: string }).message || "Something went wrong. Try again.");
+      } else {
+        setMessage("Something went wrong. Try again.");
+      }
     } finally {
       setSubmitting(false);
     }

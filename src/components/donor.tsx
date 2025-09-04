@@ -50,7 +50,7 @@ export default function DonorMap() {
   const [focusLocation, setFocusLocation] = useState<[number, number] | null>(null);
 
   useEffect(() => {
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: "/marker-icon-2x.png",
       iconUrl: "/images/logo.png",

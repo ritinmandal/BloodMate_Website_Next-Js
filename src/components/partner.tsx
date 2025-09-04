@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, ReactElement } from 'react';
+import { useEffect, useRef, ReactElement } from 'react';
 
 
 type Partner = {
@@ -71,7 +71,6 @@ const partners: Partner[] = [
 
 export default function PartnersHub() {
   const cardsRef = useRef<HTMLDivElement[]>([]);
-  const [paused, setPaused] = useState(false); 
 
   useEffect(() => {
     const io = new IntersectionObserver(
@@ -108,7 +107,7 @@ export default function PartnersHub() {
           {partners.map((p, i) => (
             <div
               key={p.title}
-              ref={(el) => el && (cardsRef.current[i] = el)}
+              ref={(el) => { if (el) cardsRef.current[i] = el; }}
               className="
                 group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm
                 opacity-0 translate-y-4 transition-all duration-700

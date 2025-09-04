@@ -183,7 +183,7 @@ export default function StockAndRequests() {
                 return (
                   <div
                     key={s.group}
-                    ref={(el) => el && (cardsRef.current[i] = el)}
+                    ref={(el) => { if (el) cardsRef.current[i] = el; }}
                     className="
                       group relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm
                       opacity-0 translate-y-3 transition-all duration-700 hover:-translate-y-0.5 hover:shadow-lg

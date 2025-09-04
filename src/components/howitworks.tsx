@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 type Step = {
   n: number;
   title: string;
   text: string;
-  icon: JSX.Element;
+  icon: React.ReactElement;
 };
 
 const steps: Step[] = [

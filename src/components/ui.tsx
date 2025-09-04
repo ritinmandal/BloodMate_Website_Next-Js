@@ -53,8 +53,7 @@ export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDi
 }
 
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, ...props }, ref) => {
+export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(({ className, ...props }, ref) => {
   return (
     <input
       ref={ref}
@@ -98,7 +97,7 @@ export function Badge(
 export function DropdownMenu({ children }: { children: React.ReactNode }) {
   return <div className="relative inline-block text-left">{children}</div>;
 }
-export function DropdownMenuTrigger({ asChild, children }: { asChild?: boolean; children: React.ReactNode }) {
+export function DropdownMenuTrigger({ children }: { children: React.ReactNode }) {
   return <div>{children}</div>;
 }
 export function DropdownMenuContent({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {

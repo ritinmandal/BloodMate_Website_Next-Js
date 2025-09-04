@@ -111,8 +111,12 @@ export default function HospitalsWithMapTailwind({
         if (error) throw error;
         if (!mounted) return;
         setRows((data || []) as HospitalRow[]);
-      } catch (e: any) {
-        setError(e?.message || 'Failed to load hospitals');
+      } catch (e: unknown) {
+        if (typeof e === 'object' && e !== null && 'message' in e) {
+          setError((e as { message?: string }).message || 'Failed to load hospitals');
+        } else {
+          setError('Failed to load hospitals');
+        }
       } finally {
         if (mounted) setLoading(false);
       }
@@ -170,7 +174,7 @@ export default function HospitalsWithMapTailwind({
           await new Promise(r => setTimeout(r, 150));
         } catch { }
       }
-      if (!cancelled && bounds.length >= 2) mapRef.current!.fitBounds(bounds as any, { padding: [56, 56] });
+      if (!cancelled && bounds.length >= 2) mapRef.current!.fitBounds(bounds as L.LatLngBoundsExpression, { padding: [56, 56] });
     })();
     return () => { cancelled = true; };
   }, [filtered]);
@@ -195,7 +199,7 @@ export default function HospitalsWithMapTailwind({
   function fitAllMarkers() {
     const pts: [number, number][] = [];
     markersRef.current.forEach(m => pts.push([m.getLatLng().lat, m.getLatLng().lng]));
-    if (pts.length >= 2) mapRef.current?.fitBounds(pts as any, { padding: [56, 56] });
+    if (pts.length >= 2) mapRef.current?.fitBounds(pts as L.LatLngBoundsExpression, { padding: [56, 56] });
   }
   function resetView() {
     mapRef.current?.setView(INDIA_CENTER, defaultZoom, { animate: true });
@@ -378,7 +382,7 @@ export default function HospitalsWithMapTailwind({
           transition={{ type: 'spring', stiffness: 120, damping: 18 }}
           className="relative md:col-span-3"
         >
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+          <div className="relative z-0 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
             <div ref={mapEl} style={{ height }} className="rounded-2xl" />
             <div className="pointer-events-none absolute top-3 right-3 flex flex-col gap-2">
               <button

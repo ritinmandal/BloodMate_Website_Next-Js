@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Droplet, Users } from 'lucide-react';
 import Image from 'next/image';
 
@@ -43,11 +43,11 @@ export default function BloodCompatibilitySection({
   const recipients = useMemo(() => donorsToRecipients[type], [type]); 
   const donors     = useMemo(() => recipientsToDonors[type], [type]); 
 
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0, y: 12 },
     show: {
       opacity: 1, y: 0,
-      transition: { duration: 0.5, ease: 'easeOut' }
+      transition: { duration: 0.5, ease: "easeOut" }
     }
   };
 
@@ -56,9 +56,9 @@ export default function BloodCompatibilitySection({
     show: { opacity: 1, transition: { staggerChildren: 0.06 } }
   };
 
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, y: 10, scale: 0.98 },
-    show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.25 } }
+    show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.25, ease: "easeOut" } }
   };
 
   return (
@@ -76,7 +76,7 @@ export default function BloodCompatibilitySection({
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         className="mb-18 text-center sm:mb-10"
       >
         <h1 className="text-3xl sm:text-4xl mt-5 font-extrabold text-black-700">

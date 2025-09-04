@@ -27,13 +27,11 @@ export default function WaveSeparatorflip({
   return (
     <div
       className={`wave-wrapper ${wrapperClasses}`}
-      style={
-        {
-          ['--wave-color' as any]: primaryColor,
-          ['--bg-color' as any]: backgroundColor,
-          ['--wave-height' as any]: `${height}px`,
-        } as React.CSSProperties
-      }
+      style={{
+        '--wave-color': primaryColor,
+        '--bg-color': backgroundColor,
+        '--wave-height': `${height}px`,
+      } as React.CSSProperties}
       aria-hidden="true"
     >
       <svg

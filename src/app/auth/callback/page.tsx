@@ -37,7 +37,7 @@ async function insertDonor(userId: string, m: DonorMeta) {
       gender: (m.gender || "other") as "male" | "female" | "other",
       dob: m.dob ?? "",
       phone: m.phone ?? "",
-      blood_group: (m.blood_group || "") as any,
+      blood_group: (m.blood_group || "") as string,
       city: m.city ?? "",
       state: m.state ?? "",
     },
@@ -153,9 +153,13 @@ export default function AuthCallback() {
 
         setStatus("success");
         setNote("Account verified & saved. You can close this tab or continue.");
-      } catch (e: any) {
+      } catch (e: unknown) {
         setStatus("error");
-        setNote(e?.message || "Something went wrong.");
+        if (typeof e === "object" && e !== null && "message" in e && typeof (e as { message?: string }).message === "string") {
+          setNote((e as { message: string }).message);
+        } else {
+          setNote("Something went wrong.");
+        }
       }
     })();
   }, []);

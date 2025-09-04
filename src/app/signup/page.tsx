@@ -36,7 +36,7 @@ const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const
 
 
 const INPUT_BASE =
-  "w-full rounded-xl border bg-white/10 backdrop-blur-md px-3 py-2 text-sm text-white placeholder-white/70 outline-none shadow-sm transition focus:ring-2";
+  "w-full rounded-xl border bg-white/10 backdrop-blur-md px-3 py-2 text-sm text-black placeholder-white/70 outline-none shadow-sm transition focus:ring-2";
 const SELECT_CLS = (role: Role) =>
   `${INPUT_BASE} ${
     role === "hospital"
@@ -264,8 +264,12 @@ export default function SignupForm() {
       } else {
         throw new Error("Please choose an account type.");
       }
-    } catch (e: any) {
-      setMessage(e?.message || "Something went wrong. Try again.");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setMessage(e.message || "Something went wrong. Try again.");
+      } else {
+        setMessage("Something went wrong. Try again.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -297,7 +301,6 @@ export default function SignupForm() {
         !hospital.city
       : true);
 
-  const borderTint = role === "hospital" ? "rgba(56,189,248,0.65)" : "rgba(244,114,182,0.65)";
   const shadowTint = role === "hospital" ? "rgba(56,189,248,0.35)" : "rgba(244,63,94,0.35)";
 
   return (
@@ -375,7 +378,7 @@ export default function SignupForm() {
                   exit={{ opacity: 0, y: -8 }}
                   className="flex items-center justify-center py-12"
                 >
-                  <p className="text-sm text-white/80">Select an account type above to continue.</p>
+                  <p className="text-sm text-black">Select an account type above to continue.</p>
                 </motion.div>
               )}
 
@@ -558,6 +561,7 @@ export default function SignupForm() {
           >
             <motion.button
               type="submit"
+              disabled={formDisabled}
               whileTap={{ scale: 0.98 }}
               whileHover={{ y: -1 }}
               className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-rose-600 to-red-500 px-6 py-3 text-center text-white shadow-lg focus:outline-none disabled:opacity-60"

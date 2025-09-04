@@ -1,9 +1,12 @@
 'use client';
 
 import { useLayoutEffect, useRef, type CSSProperties } from 'react';
+
+interface CustomCSSProperties extends CSSProperties {
+  '--reveal': string;
+}
 import { Great_Vibes } from 'next/font/google';
 import { gsap } from 'gsap';
-import WaveSeparator from './divider';
 const greatVibes = Great_Vibes({
   subsets: ['latin'],
   weight: '400',
@@ -51,7 +54,9 @@ export default function HeroPremium() {
       if (v) {
         v.muted = true;
         v.loop = true;
-        (v as any).playsInline = true;
+        if (v) {
+          v.setAttribute('playsinline', '');
+        }
         const tryPlay = () => v.play().catch(() => {});
         v.addEventListener('canplay', tryPlay, { once: false });
         if (i === 0) tryPlay();
@@ -116,8 +121,8 @@ export default function HeroPremium() {
       tlWrite
         .fromTo(
           textEl,
-          { ['--reveal' as any]: '0%' },
-          { ['--reveal' as any]: '100%', duration: 2.4, delay: 0.2 }
+          { ['--reveal' as keyof CustomCSSProperties]: '0%' },
+          { ['--reveal' as keyof CustomCSSProperties]: '100%', duration: 2.4, delay: 0.2 }
         )
         .fromTo(
           pen,
@@ -127,7 +132,7 @@ export default function HeroPremium() {
             xPercent: 100,
             duration: 2.4,
             delay: 0.2,
-            onComplete: () => gsap.to(pen, { autoAlpha: 0, duration: 0.3 }),
+            onComplete: () => { gsap.to(pen, { autoAlpha: 0, duration: 0.3 }); },
           },
           0
         )
@@ -143,7 +148,9 @@ export default function HeroPremium() {
     window.addEventListener('touchstart', unlock, { once: true, passive: true });
     window.addEventListener('click', unlock, { once: true });
 
-    return () => auto.kill();
+    return () => {
+      auto.kill();
+    };
   }, []);
 
   return (

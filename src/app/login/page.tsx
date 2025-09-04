@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { Card, CardHeader, CardTitle, CardContent, Input, Button } from '@/components/ui';
-import { Droplet } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent, Input } from '@/components/ui';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LoginPage() {
@@ -52,8 +51,12 @@ export default function LoginPage() {
 
       if (profile?.role === 'admin') router.replace('/admin');
       else router.replace('/user');
-    } catch (e: any) {
-      setErr(e.message ?? 'Authentication failed');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setErr(e.message ?? 'Authentication failed');
+      } else {
+        setErr('Authentication failed');
+      }
     } finally {
       setLoading(false);
     }

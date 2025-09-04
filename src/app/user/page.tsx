@@ -6,12 +6,11 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import {
   Card, CardHeader, CardTitle, CardContent, CardDescription,
-  Badge, Button, Table, TableHeader, TableRow, TableHead, TableBody, TableCell,
-  Progress
+  Badge, Button, Table, TableHeader, TableRow, TableHead, TableBody, TableCell, Progress,
 } from '@/components/ui';
 import {
   Droplet, HeartHandshake, CalendarDays, MapPin, Phone, Mail, User2, Globe2,
-  CheckCircle2, ShieldCheck, AlertCircle, Clock
+ AlertCircle, Clock
 } from 'lucide-react';
 
 type InventoryRow = { blood_group: string; units_available: number };
@@ -42,7 +41,7 @@ type Donation = {
   id: string;
   donated_at: string;
   units_total?: number | null;
-  component_yield?: any | null;
+  component_yield?: Record<string, unknown> | null;
 };
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -210,8 +209,8 @@ export default function UserDashboard() {
             <CardContent className="space-y-3 text-sm">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className="bg-rose-600">Blood Group: {donor?.blood_group ?? '—'}</Badge>
-                <Badge variant="outline">{donor?.gender ?? '—'}</Badge>
-                <Badge variant="outline">DOB: {donor?.dob ?? '—'}</Badge>
+                <Badge variant="secondary">{donor?.gender ?? '—'}</Badge>
+                <Badge variant="secondary">DOB: {donor?.dob ?? '—'}</Badge>
               </div>
 
               <div className="flex items-center gap-2 text-gray-700">
@@ -281,8 +280,13 @@ export default function UserDashboard() {
                   <span>Cooldown progress</span>
                   <span>{pctToEligibility}%</span>
                 </div>
-                <Progress value={pctToEligibility} className="h-2" />
-              </div>
+                <Progress className="h-2" />
+                <div className="h-2 w-full bg-gray-200 rounded">
+                  <div
+                    className="h-2 bg-rose-500 rounded"
+                    style={{ width: `${pctToEligibility}%` }}
+                  />
+                </div>
 
               
                 <div className="flex items-center gap-2 rounded-lg border bg-white px-2.5 py-2 col-span-2">
@@ -291,17 +295,18 @@ export default function UserDashboard() {
                 </div>
               
 
-              <div className="pt-2">
-                <Button onClick={bookAppointmentNow} className="w-full">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Book Appointment
-                </Button>
-                {!eligible && (
-                  <p className="mt-2 text-xs text-amber-700 flex items-center gap-1">
-                    <AlertCircle className="h-3.5 w-3.5" />
-                    You can still book now; we’ll schedule you on or after the eligible date.
-                  </p>
-                )}
+                <div className="pt-2">
+                  <Button onClick={bookAppointmentNow} className="w-full">
+                    <CalendarDays className="mr-2 h-4 w-4" />
+                    Book Appointment
+                  </Button>
+                  {!eligible && (
+                    <p className="mt-2 text-xs text-amber-700 flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      You can still book now; we’ll schedule you on or after the eligible date.
+                    </p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -375,7 +380,7 @@ export default function UserDashboard() {
                       <TableCell className="font-medium">{prettyDate(a.slot_time)}</TableCell>
                       <TableCell>{a.center ?? '—'}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{a.status}</Badge>
+                        <Badge variant="secondary">{a.status}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button variant="outline" size="sm" onClick={() => router.push(`/appointments/${a.id}`)}>

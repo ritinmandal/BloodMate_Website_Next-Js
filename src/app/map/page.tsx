@@ -114,8 +114,12 @@ export default function DonorsWithMapTailwind({
         if (error) throw error;
         if (!mounted) return;
         setDonors((data || []) as Donor[]);
-      } catch (e: any) {
-        setError(e?.message || 'Failed to load donors');
+      } catch (e: unknown) {
+        if (typeof e === 'object' && e !== null && 'message' in e) {
+          setError((e as { message?: string }).message || 'Failed to load donors');
+        } else {
+          setError('Failed to load donors');
+        }
       } finally {
         if (mounted) setLoading(false);
       }
@@ -171,7 +175,7 @@ export default function DonorsWithMapTailwind({
           await new Promise(r => setTimeout(r, 180));
         } catch { }
       }
-      if (!cancelled && bounds.length >= 2) mapRef.current!.fitBounds(bounds as any, { padding: [56, 56] });
+      if (!cancelled && bounds.length >= 2) mapRef.current!.fitBounds(bounds as L.LatLngBoundsExpression, { padding: [56, 56] });
     })();
     return () => { cancelled = true; };
   }, [donorsFiltered]);
@@ -208,7 +212,7 @@ export default function DonorsWithMapTailwind({
   function fitAllMarkers() {
     const pts: [number, number][] = [];
     markersRef.current.forEach(m => pts.push([m.getLatLng().lat, m.getLatLng().lng]));
-    if (pts.length >= 2) mapRef.current?.fitBounds(pts as any, { padding: [56, 56] });
+    if (pts.length >= 2) mapRef.current?.fitBounds(pts as L.LatLngBoundsExpression, { padding: [56, 56] });
   }
 
   function resetView() {
@@ -383,7 +387,7 @@ export default function DonorsWithMapTailwind({
           transition={{ type: 'spring', stiffness: 120, damping: 18 }}
           className="relative md:col-span-3"
         >
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+          <div className="relative z-0  overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
             <div
               ref={mapEl}
               style={{ height }}

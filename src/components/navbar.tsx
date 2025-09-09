@@ -227,7 +227,7 @@ export default function NavBar() {
 
               <li className="w-full">
                 <Link
-                  href="/#about"
+                  href="/aboutus"
                   onClick={(e) => handleHash(e , '#about')}
                   className="block w-full text-center rounded-xl px-4 py-3 text-lg font-semibold text-black hover:bg-black/5 transition"
                 >
@@ -240,33 +240,33 @@ export default function NavBar() {
                   href="/map"
                   className="block w-full text-center rounded-xl px-4 py-3 text-lg font-semibold text-black hover:bg-black/5 transition"
                 >
-                  Donations
+                  Donors
                 </Link>
               </li>
 
               <li className="w-full">
                 <Link
-                  href="/#pages"
+                  href="/hospital"
                   onClick={(e) => handleHash(e , '#pages')}
                   className="block w-full text-center rounded-xl px-4 py-3 text-lg font-semibold text-black hover:bg-black/5 transition"
                 >
-                  Pages
+                  Hospitals
                 </Link>
               </li>
 
               <li className="w-full">
                 <Link
-                  href="/#blog"
+                  href="/campaign"
                   onClick={(e) => handleHash(e , '#blog')}
                   className="block w-full text-center rounded-xl px-4 py-3 text-lg font-semibold text-black hover:bg-black/5 transition"
                 >
-                  Blog
+                  Campaigns
                 </Link>
               </li>
 
               <li className="w-full">
                 <Link
-                  href="/#contact"
+                  href="/contact"
                   onClick={(e) => handleHash(e, '#contact')}
                   className="block w-full text-center rounded-xl px-4 py-3 text-lg font-semibold text-black hover:bg-black/5 transition"
                 >
@@ -282,6 +282,13 @@ export default function NavBar() {
               >
                 <Icon path="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.682 4.318 12.682a4.5 4.5 0 010-6.364z" className="w-4 h-4 mr-2" strokeColor="white" />
                 Donate
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex items-center rounded-full bg-red-600 px-5 py-2.5 text-white font-semibold"
+              >
+                <Icon path="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.682 4.318 12.682a4.5 4.5 0 010-6.364z" className="w-4 h-4 mr-2" strokeColor="white" />
+                Login
               </Link>
             </div>
           </nav>

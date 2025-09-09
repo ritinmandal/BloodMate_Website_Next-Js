@@ -31,12 +31,14 @@ export default function Footer() {
             Email address
           </label>
           <input
+          suppressHydrationWarning
             id="newsletter"
             type="email"
             placeholder="Enter Email Address"
             className="h-12 w-full rounded-full bg-white/95 px-5 text-[#400909] placeholder:text-[#a67c7c] outline-none ring-0 focus:outline-none"
           />
           <button
+          suppressHydrationWarning
             aria-label="Subscribe"
             className="grid h-12 w-12 place-items-center rounded-full bg-[#e63946] transition hover:brightness-95 active:brightness-90"
           >

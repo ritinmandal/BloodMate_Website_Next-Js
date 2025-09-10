@@ -18,7 +18,7 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import { Doughnut, Bar, Line, Radar } from 'react-chartjs-2';
+import { Doughnut, Bar, Line } from 'react-chartjs-2';
 
 import {
   LogOut, Droplet, LayoutGrid, Database, BarChart3, Settings,
@@ -47,6 +47,32 @@ type BloodRow = {
   updated_at: string | null;
 };
 
+type DonorRow = {
+  user_id: string;
+  id: string; 
+  full_name: string | null;
+  gender: string; 
+  dob: string | null;
+  phone: string | null;
+  blood_group: string;
+  city: string | null;
+  state: string | null;
+  created_at: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+};
+
+type HospitalRow = {
+  user_id: string;
+  hospital_name: string | null;
+  contact_person: string | null;
+  license_no: string | null;
+  phone: string | null;
+  city: string | null;
+  state: string | null;
+  created_at: string | null;
+};
+
 const groupsOrder = ['O+','O-','A+','A-','B+','B-','AB+','AB-'] as const;
 
 export default function AdminPage() {
@@ -56,12 +82,14 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // inventory state
   const [rows, setRows] = useState<BloodRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [delta, setDelta] = useState<number>(1);
   const [bg, setBg] = useState<string>('O+');
   const [msg, setMsg] = useState<{ type: 'ok'|'warn'|'err'; text: string } | null>(null);
+
+  const [donors, setDonors] = useState<DonorRow[]>([]);
+  const [hospitals, setHospitals] = useState<HospitalRow[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -114,6 +142,28 @@ export default function AdminPage() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const loadDonorsHospitals = async () => {
+      // Donors
+      const { data: donorsData } = await supabase
+        .from('donors')
+        .select('user_id, id, full_name, gender, dob, phone, blood_group, city, state, created_at, latitude, longitude');
+
+      setDonors(donorsData ?? []);
+
+      // Hospitals
+      const { data: hospitalsData } = await supabase
+        .from('hospitals')
+        .select('user_id, hospital_name, contact_person, license_no, phone, city, state, created_at');
+
+      setHospitals(hospitalsData ?? []);
+    };
+
+    loadDonorsHospitals();
   }, [isAdmin]);
 
   const logout = async () => {
@@ -191,6 +241,121 @@ export default function AdminPage() {
       g.endsWith('+') ? 'bg-rose-50 text-rose-700 ring-rose-200' : 'bg-sky-50 text-sky-700 ring-sky-200'
     }`;
 
+  const monthKey = (iso?: string | null) => {
+    if (!iso) return 'Unknown';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return 'Unknown';
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; // YYYY-MM
+  };
+
+  const lastSixMonths = () => {
+    const now = new Date();
+    const arr: string[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      arr.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+    }
+    return arr;
+  };
+
+  const donorsByBloodGroup = useMemo(() => {
+    // preserve fixed order for BG
+    const labels = [...groupsOrder];
+    const map = new Map<string, number>(labels.map(l => [l, 0]));
+    for (const d of donors) {
+      const bg = d.blood_group as string;
+      if (map.has(bg)) map.set(bg, (map.get(bg) ?? 0) + 1);
+    }
+    const values = labels.map(l => map.get(l) ?? 0);
+    const colors = ['#f87171','#fbbf24','#34d399','#60a5fa','#a78bfa','#f472b6','#fb923c','#2dd4bf'];
+    return {
+      labels,
+      datasets: [{ label: 'Donors', data: values, backgroundColor: colors, borderColor: colors }]
+    };
+  }, [donors]);
+
+  const donorsByState = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const d of donors) {
+      const st = (d.state || 'Unknown').toString();
+      map.set(st, (map.get(st) ?? 0) + 1);
+    }
+    const labels = Array.from(map.keys());
+    const values = labels.map(l => map.get(l) ?? 0);
+    const palette = ['#93c5fd','#86efac','#fda4af','#c4b5fd','#fcd34d','#67e8f9','#a7f3d0'];
+    const colors = labels.map((_, i) => palette[i % palette.length]);
+    return { labels, datasets: [{ label: 'Donors by State', data: values, backgroundColor: colors, borderColor: colors }] };
+  }, [donors]);
+
+  const donorsByGender = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const d of donors) {
+      const g = (d.gender || 'unknown').toString();
+      map.set(g, (map.get(g) ?? 0) + 1);
+    }
+    const labels = Array.from(map.keys());
+    const values = labels.map(l => map.get(l) ?? 0);
+    const colors = ['#60a5fa','#34d399','#f97316','#f43f5e','#a78bfa','#22d3ee','#facc15'];
+    return { labels, datasets: [{ label: 'Gender', data: values, backgroundColor: colors.slice(0, labels.length) }] };
+  }, [donors]);
+
+  const donorsMonthly = useMemo(() => {
+    const months = lastSixMonths();
+    const map = new Map<string, number>(months.map(m => [m, 0]));
+    for (const d of donors) {
+      const k = monthKey(d.created_at);
+      if (map.has(k)) map.set(k, (map.get(k) ?? 0) + 1);
+    }
+    const labels = months;
+    const values = labels.map(m => map.get(m) ?? 0);
+    return {
+      labels,
+      datasets: [{
+        label: 'Donors added (last 6 months)',
+        data: values,
+        fill: true,
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.15)',
+        tension: 0.3
+      }]
+    };
+  }, [donors]);
+
+  const hospitalsByState = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const h of hospitals) {
+      const st = (h.state || 'Unknown').toString();
+      map.set(st, (map.get(st) ?? 0) + 1);
+    }
+    const labels = Array.from(map.keys());
+    const values = labels.map(l => map.get(l) ?? 0);
+    const palette = ['#fda4af','#93c5fd','#fbbf24','#86efac','#a78bfa','#67e8f9','#fca5a5'];
+    const colors = labels.map((_, i) => palette[i % palette.length]);
+    return { labels, datasets: [{ label: 'Hospitals', data: values, backgroundColor: colors, borderColor: colors }] };
+  }, [hospitals]);
+
+  const hospitalsMonthly = useMemo(() => {
+    const months = lastSixMonths();
+    const map = new Map<string, number>(months.map(m => [m, 0]));
+    for (const h of hospitals) {
+      const k = monthKey(h.created_at);
+      if (map.has(k)) map.set(k, (map.get(k) ?? 0) + 1);
+    }
+    const labels = months;
+    const values = labels.map(m => map.get(m) ?? 0);
+    return {
+      labels,
+      datasets: [{
+        label: 'Hospitals added (last 6 months)',
+        data: values,
+        borderColor: '#f43f5e',
+        backgroundColor: 'rgba(244,63,94,0.15)',
+        fill: true,
+        tension: 0.3
+      }]
+    };
+  }, [hospitals]);
+
   if (loading) {
     return <div className="grid h-[60vh] place-items-center text-gray-500">Loading…</div>;
   }
@@ -223,7 +388,7 @@ export default function AdminPage() {
         <div className="absolute left-0 w-full px-4">
           <button
             onClick={logout}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 font-medium transition hover:bg-rose-600 hover:text-white hover:border-rose-600"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 font-medium transition hover:bg-rose-600 hover:text-white hover	border-rose-600"
           >
             <LogOut className="h-4 w-4" /> Logout
           </button>
@@ -432,6 +597,7 @@ export default function AdminPage() {
 
           {view === 'charts' && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* Inventory charts (existing) */}
               <div className="rounded-2xl border bg-white p-6 shadow-sm">
                 <div className="mb-3 text-sm font-medium text-gray-600">Availability by Group</div>
                 <Bar
@@ -445,7 +611,7 @@ export default function AdminPage() {
                   data={{ ...chartData, datasets: [{ ...chartData.datasets[0], label: 'Share' }] }}
                 />
               </div>
-              <div className="rounded-2xl border bg-white p-6 shadow-sm md:col-span-2">
+              <div className="rounded-2xl border bg-white p-6 shadow-sm">
                 <div className="mb-3 text-sm font-medium text-gray-600">Inventory Trends</div>
                 <Line
                   data={{
@@ -463,29 +629,32 @@ export default function AdminPage() {
                   }}
                 />
               </div>
-              <div className="rounded-2xl border bg-white p-6 shadow-sm md:col-span-2">
-                <div className="mb-3 text-sm font-medium text-gray-600">Distribution Comparison</div>
-                <Radar
-                  data={{
-                    labels: chartData.labels,
-                    datasets: [
-                      {
-                        label: 'Now',
-                        data: (chartData.datasets[0].data as number[]),
-                        backgroundColor: 'rgba(96,165,250,0.25)',
-                        borderColor: '#60a5fa',
-                        pointBackgroundColor: '#60a5fa',
-                      },
-                      {
-                        label: 'Earlier (approx)',
-                        data: (chartData.datasets[0].data as number[]).map(v => Math.max(0, Math.round(v*0.85))),
-                        backgroundColor: 'rgba(244,114,182,0.2)',
-                        borderColor: '#f472b6',
-                        pointBackgroundColor: '#f472b6',
-                      }
-                    ]
-                  }}
-                />
+
+
+              <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                <div className="mb-3 text-sm font-medium text-gray-600">Donors by Blood Group</div>
+                <Bar data={donorsByBloodGroup} options={{ plugins: { legend: { display: false } } }} />
+              </div>
+              <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                <div className="mb-3 text-sm font-medium text-gray-600">Donors by State</div>
+                <Doughnut data={donorsByState} />
+              </div>
+              <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                <div className="mb-3 text-sm font-medium text-gray-600">Donors by Gender</div>
+                <Bar data={donorsByGender} options={{ plugins: { legend: { display: false } } }} />
+              </div>
+              <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                <div className="mb-3 text-sm font-medium text-gray-600">Donors Added (Last 6 Months)</div>
+                <Line data={donorsMonthly} />
+              </div>
+
+              <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                <div className="mb-3 text-sm font-medium text-gray-600">Hospitals by State</div>
+                <Bar data={hospitalsByState} options={{ plugins: { legend: { display: false } } }} />
+              </div>
+              <div className="rounded-2xl border bg-white p-6 shadow-sm">
+                <div className="mb-3 text-sm font-medium text-gray-600">Hospitals Added (Last 6 Months)</div>
+                <Line data={hospitalsMonthly} />
               </div>
             </div>
           )}

@@ -170,6 +170,7 @@ export default function HeroPremium() {
               className="absolute inset-0 will-change-transform will-change-filter"
             >
               <video
+              suppressHydrationWarning
                 className="h-full w-full object-cover"
                 src={s.src}
                 autoPlay
@@ -186,6 +187,7 @@ export default function HeroPremium() {
 
  
         <button
+        suppressHydrationWarning
           ref={prevRef}
           aria-label="Previous slide"
           className="absolute left-4 top-1/2 -translate-y-1/2 z-30 h-12 w-12 rounded-full bg-white/15 hover:bg-white/25 text-white backdrop-blur ring-1 ring-white/20 transition"
@@ -193,6 +195,7 @@ export default function HeroPremium() {
           ‹
         </button>
         <button
+        suppressHydrationWarning
           ref={nextRef}
           aria-label="Next slide"
           className="absolute right-4 top-1/2 -translate-y-1/2 z-30 h-12 w-12 rounded-full bg-white/15 hover:bg-white/25 text-white backdrop-blur ring-1 ring-white/20 transition"
@@ -203,6 +206,7 @@ export default function HeroPremium() {
         <div className="pointer-events-auto absolute left-1/2 bottom-6 -translate-x-1/2 flex gap-3 z-30">
           {slides.map((_, i) => (
             <button
+            suppressHydrationWarning
               key={i}
               ref={(el) => setDotRef(el, i)}
               className="h-2.5 w-2.5 rounded-full bg-white transition-all duration-300 opacity-50"

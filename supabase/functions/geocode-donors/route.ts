@@ -10,26 +10,39 @@ type DonorRow = {
   longitude: number | null;
 };
 
+type OpenCageResponse = {
+  results: {
+    geometry?: {
+      lat: number;
+      lng: number;
+    };
+  }[];
+};
+
 const supabase = createClient(
-  process.env.SUPABASE_URL!,                 
-  process.env.SUPABASE_SERVICE_ROLE_KEY!     
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const OPENCAGE = process.env.OPENCAGE_API_KEY!;      
-const INTERNAL_SECRET = process.env.INTERNAL_CRON_SECRET; 
+const OPENCAGE = process.env.OPENCAGE_API_KEY!;
+const INTERNAL_SECRET = process.env.INTERNAL_CRON_SECRET;
 
 async function geocode(city?: string | null, state?: string | null) {
   if (!city || !state) return null;
+
   const q = encodeURIComponent(`${city}, ${state}, India`);
   const url = `https://api.opencagedata.com/geocode/v1/json?q=${q}&key=${OPENCAGE}&limit=1&no_annotations=1`;
+
   const res = await fetch(url);
   if (!res.ok) return null;
-  const data: any = await res.json();
-  const g = data?.results?.[0]?.geometry;
-  return g ? { lat: g.lat as number, lng: g.lng as number } : null;
+
+  const data: OpenCageResponse = await res.json();
+  const g = data.results?.[0]?.geometry;
+
+  return g ? { lat: g.lat, lng: g.lng } : null;
 }
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function GET(request: Request) {
   try {
@@ -49,17 +62,21 @@ export async function GET(request: Request) {
       .select("user_id, city, state, latitude, longitude")
       .limit(limit);
 
-    if (onlyNulls) query = query.is("latitude", null).is("longitude", null);
+    if (onlyNulls) {
+      query = query.is("latitude", null).is("longitude", null);
+    }
 
     const { data: donors, error } = await query;
     if (error) throw error;
 
     const updates: { user_id: string; latitude: number; longitude: number }[] = [];
 
-    for (const d of (donors as DonorRow[]) ?? []) {
+    for (const d of (donors ?? []) as DonorRow[]) {
       const g = await geocode(d.city, d.state);
-      if (g) updates.push({ user_id: d.user_id, latitude: g.lat, longitude: g.lng });
-      await sleep(250); 
+      if (g) {
+        updates.push({ user_id: d.user_id, latitude: g.lat, longitude: g.lng });
+      }
+      await sleep(250); // avoid hitting API rate limits
     }
 
     if (updates.length) {
@@ -69,9 +86,14 @@ export async function GET(request: Request) {
       if (upErr) throw upErr;
     }
 
-    return Response.json({ fetched: donors?.length ?? 0, updated: updates.length, onlyNulls });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e?.message || String(e) }), {
+    return Response.json({
+      fetched: donors?.length ?? 0,
+      updated: updates.length,
+      onlyNulls,
+    });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { "content-type": "application/json" },
     });

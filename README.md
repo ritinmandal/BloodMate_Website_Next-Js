@@ -1,4 +1,4 @@
-# BloodMate — Smart Blood Bank Management System
+# 🩸 BloodMate — Smart Blood Bank Management System
 
 Production-ready **Next.js** application for a modern blood donation and management ecosystem. Built with a refined **UI (deep blue, cyan, yellow, white gradients)**, smooth motion, and a powerful backend powered by **Supabase**.
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](#)

@@ -15,10 +15,10 @@ Production-ready **Next.js** application for a modern blood donation and managem
 
 ## 📸 Screenshots and Demos
   <img alt="BloodMate" src="public/hero.png" width="800">
+  <img alt="BloodMate" src="public/login.png" width="800">
   <img alt="BloodMate" src="public/map.png" width="800">
-  <img alt="BloodMate" src="public/dashboard.png" width="800">
-  <img alt="BloodMate" src="public/appointment.png" width="800">
-  <img alt="BloodMate" src="public/guide.png" width="800">
+  <img alt="BloodMate" src="public/footer.png" width="800">
+  <img alt="BloodMate" src="public/contact.png" width="800">
 
 ---
 

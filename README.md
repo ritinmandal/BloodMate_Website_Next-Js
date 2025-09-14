@@ -13,7 +13,7 @@ Production-ready **Next.js** application for a modern blood donation and managem
 
 ---
 
-## Vercel Link
+## ✌️Vercel Link
 https://blood-mate-website-next-js.vercel.app/
 
 ## 📸 Screenshots and Demos
